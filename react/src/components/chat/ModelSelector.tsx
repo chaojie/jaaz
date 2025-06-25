@@ -38,8 +38,8 @@ const ModelSelector: React.FC = () => {
   // Sort providers to put Jaaz first
   const sortProviders = (providers: [string, typeof textModels][]) => {
     return providers.sort(([providerA], [providerB]) => {
-      if (providerA === 'jaaz') return -1
-      if (providerB === 'jaaz') return 1
+      if (providerA === 'comfyui') return -1
+      if (providerB === 'comfyui') return 1
       return 0
     })
   }

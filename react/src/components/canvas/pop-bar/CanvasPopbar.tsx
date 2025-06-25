@@ -6,6 +6,7 @@ import { useKeyPress } from 'ahooks'
 import { motion } from 'motion/react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { exportToCanvas } from "@excalidraw/excalidraw";
 
 type CanvasPopbarProps = {
   pos: { x: number; y: number }
@@ -16,8 +17,37 @@ const CanvasPopbar = ({ pos, selectedImages }: CanvasPopbarProps) => {
   const { t } = useTranslation()
   const { excalidrawAPI } = useCanvas()
 
-  const handleAddToChat = () => {
-    eventBus.emit('Canvas::AddImagesToChat', selectedImages)
+
+  const handleAddToChat = async () => {
+    if (!excalidrawAPI) {
+      return
+    }
+    const elements = excalidrawAPI.getSceneElements();
+    if (!elements || !elements.length) {
+      return
+    }
+    const canvas = await exportToCanvas({
+      elements,
+      appState: {
+        exportWithDarkMode: false,
+      },
+      files: excalidrawAPI.getFiles(),
+      getDimensions: () => { return {width: 350, height: 350}}
+    });
+    const ctx = canvas.getContext("2d")
+    /*ctx.font = "30px Virgil";
+    ctx.strokeText("My custom text", 50, 60);*/
+    var img:TCanvasAddImagesToChatEvent = [
+      {
+        fileId: '1',
+        base64: canvas.toDataURL(),
+        width: 350,
+        height: 350,
+      },
+    ]
+
+    eventBus.emit('Canvas::AddImagesToChat', img)
+    
     excalidrawAPI?.updateScene({
       appState: { selectedElementIds: {} },
     })

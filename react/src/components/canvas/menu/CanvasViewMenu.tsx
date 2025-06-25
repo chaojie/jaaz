@@ -8,15 +8,51 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useCanvas } from '@/contexts/canvas'
 import { cn } from '@/lib/utils'
-import { Minus, Plus } from 'lucide-react'
+import { Minus, Plus, MessageSquarePlus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { eventBus, TCanvasAddImagesToChatEvent } from '@/lib/event'
+import { exportToCanvas } from "@excalidraw/excalidraw";
 
 const CanvasViewMenu = () => {
   const { t } = useTranslation()
   const { excalidrawAPI } = useCanvas()
-
   const [currentZoom, setCurrentZoom] = useState<number>(100)
+
+  const handleAddToChat = async () => {
+    if (!excalidrawAPI) {
+      return
+    }
+    const elements = excalidrawAPI.getSceneElements();
+    if (!elements || !elements.length) {
+      return
+    }
+    const canvas = await exportToCanvas({
+      elements,
+      appState: {
+        exportWithDarkMode: false,
+      },
+      files: excalidrawAPI.getFiles(),
+      getDimensions: () => { return {width: 350, height: 350}}
+    });
+    const ctx = canvas.getContext("2d")
+    /*ctx.font = "30px Virgil";
+    ctx.strokeText("My custom text", 50, 60);*/
+    var img:TCanvasAddImagesToChatEvent = [
+      {
+        fileId: '1',
+        base64: canvas.toDataURL(),
+        width: 350,
+        height: 350,
+      },
+    ]
+
+    eventBus.emit('Canvas::AddImagesToChat', img)
+    
+    excalidrawAPI?.updateScene({
+      appState: { selectedElementIds: {} },
+    })
+  }
 
   const handleZoomChange = (zoom: number) => {
     excalidrawAPI?.updateScene({
@@ -48,6 +84,15 @@ const CanvasViewMenu = () => {
         'hover:bg-primary-foreground/55 hover:backdrop-blur-lg hover:text-primary'
       )}
     >
+    <Button
+      className="size-8"
+      variant="ghost"
+      size="icon"
+      onClick={() => handleAddToChat()}
+    >
+      <MessageSquarePlus />
+      <label>{t('canvas:popbar.addToChat')}</label>
+    </Button>
       <Button
         className="size-8"
         variant="ghost"
