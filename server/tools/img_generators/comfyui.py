@@ -33,15 +33,34 @@ class ComfyUIGenerator(ImageGenerator):
         asset_dir = get_asset_path('flux_comfy_workflow.json')
         basic_comfy_t2i_workflow = get_asset_path(
             'default_comfy_t2i_workflow.json')
+        basic_comfy_i2i_controlnet_union_workflow = get_asset_path(
+            'default_comfy_i2i_controlnet_union_workflow.json')
+        nunchaku_flux_1_schnell = get_asset_path(
+            'nunchaku_flux_1_schnell.json')
+        nunchaku_flux_1_schnell_controlnet_union_pro2 = get_asset_path(
+            'nunchaku_flux_1_schnell_controlnet_union_pro2.json')
+        dreamo_comfyui_v1_1 = get_asset_path(
+            'dreamo_comfyui_v1_1.json')
 
         self.flux_comfy_workflow = None
         self.basic_comfy_t2i_workflow = None
+        self.basic_comfy_i2i_controlnet_union_workflow = None
+        self.nunchaku_flux_1_schnell = None
+        self.nunchaku_flux_1_schnell_controlnet_union_pro2 = None
+        self.nunchaku_flux_1_schnell_controlnet_union_pro2 = None
+
         self.comfy_websocket_client = None
 
         try:
             self.flux_comfy_workflow = json.load(open(asset_dir, 'r'))
             self.basic_comfy_t2i_workflow = json.load(
                 open(basic_comfy_t2i_workflow, 'r'))
+            self.basic_comfy_i2i_controlnet_union_workflow = json.load(
+                open(basic_comfy_i2i_controlnet_union_workflow, 'r'))
+            self.nunchaku_flux_1_schnell = json.load(
+                open(nunchaku_flux_1_schnell, 'r'))
+            self.dreamo_comfyui_v1_1 = json.load(
+                open(dreamo_comfyui_v1_1, 'r'))
         except Exception:
             traceback.print_exc()
 
@@ -56,9 +75,6 @@ class ComfyUIGenerator(ImageGenerator):
         """
         Generate an image by calling offical ComfyUI Client
         """
-        if not self.flux_comfy_workflow:
-            raise FileNotFoundError('Flux workflow json not found')
-
         # Get context from kwargs
         ctx = kwargs.get('ctx', {})
 
@@ -81,17 +97,34 @@ class ComfyUIGenerator(ImageGenerator):
         width = int((factor * w_ratio) / 64) * 64
         height = int((factor * h_ratio) / 64) * 64
 
-        if 'flux' in model:
-            workflow = copy.deepcopy(self.flux_comfy_workflow)
+        if '文生图' in model:
+            workflow = copy.deepcopy(self.nunchaku_flux_1_schnell)
             workflow['6']['inputs']['text'] = prompt
-            workflow['30']['inputs']['ckpt_name'] = model
+            #workflow['30']['inputs']['ckpt_name'] = model
+            workflow['5']['inputs']['width'] = width
+            workflow['5']['inputs']['height'] = height
+            workflow['25']['inputs']['noise_seed'] = random.randint(1, 2 ** 32)
+        if '控制生图' in model:
+            workflow = copy.deepcopy(self.nunchaku_flux_1_schnell_controlnet_union_pro2)
+            workflow['1']['inputs']['text'] = prompt
+            workflow['36']['inputs']['image'] = input_image
+            workflow['9']['inputs']['width'] = width
+            workflow['9']['inputs']['height'] = height
+            workflow['7']['inputs']['noise_seed'] = random.randint(1, 2 ** 32)
+        if '图片编辑' in model:
+            workflow = copy.deepcopy(self.nunchaku_flux_1_schnell_controlnet_union_pro2)
+            workflow['6']['inputs']['text'] = prompt
+            workflow['58']['inputs']['image'] = input_image
             workflow['27']['inputs']['width'] = width
             workflow['27']['inputs']['height'] = height
             workflow['31']['inputs']['seed'] = random.randint(1, 2 ** 32)
         else:
-            workflow = copy.deepcopy(self.basic_comfy_t2i_workflow)
+            if input_image:
+                workflow = copy.deepcopy(self.basic_comfy_i2i_controlnet_union_workflow)
+                workflow['18']['inputs']['image'] = input_image
+            else:
+                workflow = copy.deepcopy(self.basic_comfy_t2i_workflow)
             workflow['6']['inputs']['text'] = prompt
-            workflow['4']['inputs']['ckpt_name'] = model
             workflow['5']['inputs']['width'] = width
             workflow['5']['inputs']['height'] = height
             workflow['3']['inputs']['seed'] = random.randint(1, 2 ** 32)

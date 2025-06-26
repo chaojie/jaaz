@@ -119,6 +119,13 @@ async def generate_image(
             extra_kwargs['ctx'] = ctx
         elif provider == 'wavespeed':
             extra_kwargs['aspect_ratio'] = aspect_ratio
+        
+        print('input_image_path',input_image_data)
+        # update the canvas data, add the new image element
+        canvas_data = await db_service.get_canvas_data(canvas_id)
+
+        if canvas_data:
+            input_image_data=canvas_data['thumbnail']
 
         mime_type, width, height, filename = await generator.generate(
             prompt=prompt,
@@ -143,8 +150,6 @@ async def generate_image(
             'height': height,
         })
 
-        # update the canvas data, add the new image element
-        canvas_data = await db_service.get_canvas_data(canvas_id)
         if 'data' not in canvas_data:
             canvas_data['data'] = {}
         if 'elements' not in canvas_data['data']:

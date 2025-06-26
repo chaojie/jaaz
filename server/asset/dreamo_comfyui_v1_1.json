@@ -1,0 +1,266 @@
+{
+  "6": {
+    "inputs": {
+      "text": "a person holding a paper saying \"DreamO v1.1\", on the mountain",
+      "clip": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "31",
+        0
+      ],
+      "vae": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "27": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "空Latent图像（SD3）"
+    }
+  },
+  "31": {
+    "inputs": {
+      "seed": 40,
+      "steps": 12,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "50",
+        0
+      ],
+      "positive": [
+        "35",
+        0
+      ],
+      "negative": [
+        "33",
+        0
+      ],
+      "latent_image": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "33": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "35": {
+    "inputs": {
+      "guidance": 4.5,
+      "conditioning": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Flux引导"
+    }
+  },
+  "38": {
+    "inputs": {
+      "unet_name": "flux1-dev-fp8.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "39": {
+    "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn_scaled.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "双CLIP加载器"
+    }
+  },
+  "40": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "41": {
+    "inputs": {
+      "lora_name": "flux-turbo.safetensors",
+      "strength_model": 1,
+      "model": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "42": {
+    "inputs": {
+      "lora_name": "dreamo_comfyui.safetensors",
+      "strength_model": 1,
+      "model": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "43": {
+    "inputs": {
+      "lora_name": "dreamo_cfg_distill_comfyui.safetensors",
+      "strength_model": 1,
+      "model": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "44": {
+    "inputs": {
+      "lora_name": "dreamo_sft_lora.safetensors",
+      "strength_model": 1.0000000000000002,
+      "model": [
+        "43",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "45": {
+    "inputs": {
+      "lora_name": "dreamo_dpo_lora.safetensors",
+      "strength_model": 1.2000000000000002,
+      "model": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "46": {
+    "inputs": {},
+    "class_type": "DreamOProcessorLoader",
+    "_meta": {
+      "title": "DreamO Processor Loader"
+    }
+  },
+  "50": {
+    "inputs": {
+      "model": [
+        "45",
+        0
+      ],
+      "ref1": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "ApplyDreamO",
+    "_meta": {
+      "title": "Apply DreamO"
+    }
+  },
+  "57": {
+    "inputs": {
+      "resolution": 512,
+      "ref_task": "ip",
+      "pixels": [
+        "58",
+        0
+      ],
+      "vae": [
+        "40",
+        0
+      ],
+      "dreamo_processor": [
+        "46",
+        0
+      ]
+    },
+    "class_type": "DreamORefEncode",
+    "_meta": {
+      "title": "DreamO Ref Image Encode"
+    }
+  },
+  "58": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "ETN_LoadImageBase64",
+    "_meta": {
+      "title": "Load Image (Base64)"
+    }
+  }
+}

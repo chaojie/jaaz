@@ -12,12 +12,12 @@
         0
       ],
       "positive": [
-        "6",
+        "16",
         0
       ],
       "negative": [
-        "7",
-        0
+        "16",
+        1
       ],
       "latent_image": [
         "5",
@@ -40,8 +40,14 @@
   },
   "5": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": [
+        "14",
+        0
+      ],
+      "height": [
+        "14",
+        1
+      ],
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -116,6 +122,73 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "13": {
+    "inputs": {
+      "resolution": 512,
+      "image": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "ScribblePreprocessor",
+    "_meta": {
+      "title": "Scribble Lines"
+    }
+  },
+  "14": {
+    "inputs": {},
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "15": {
+    "inputs": {
+      "control_net_name": "xinsir-controlnet-union-sdxl-1.0-promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "加载ControlNet模型"
+    }
+  },
+  "16": {
+    "inputs": {
+      "strength": 1.0000000000000002,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "15",
+        0
+      ],
+      "image": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "应用ControlNet（旧版高级）"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "",
+      "custom_width": 0,
+      "custom_height": 0
+    },
+    "class_type": "VHS_LoadImagePath",
+    "_meta": {
+      "title": "Load Image (Path) 🎥🅥🅗🅢"
     }
   }
 }

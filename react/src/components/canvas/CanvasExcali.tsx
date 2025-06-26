@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/use-theme'
 import { eventBus } from '@/lib/event'
 import * as ISocket from '@/types/socket'
 import { CanvasData } from '@/types/types'
-import { Excalidraw } from '@excalidraw/excalidraw'
+import { Excalidraw, exportToCanvas } from '@excalidraw/excalidraw'
 import {
   ExcalidrawImageElement,
   OrderedExcalidrawElement,
@@ -45,7 +45,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
   const { i18n } = useTranslation()
 
   const handleChange = useDebounce(
-    (
+    async (
       elements: Readonly<OrderedExcalidrawElement[]>,
       appState: AppState,
       files: BinaryFiles
@@ -62,17 +62,9 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         },
         files,
       }
+      const canvas = await exportToCanvas(data)
 
-      let thumbnail = ''
-      const latestImage = elements
-        .filter((element) => element.type === 'image')
-        .sort((a, b) => b.updated - a.updated)[0]
-      if (latestImage) {
-        const file = files[latestImage.fileId!]
-        if (file) {
-          thumbnail = file.dataURL
-        }
-      }
+      let thumbnail = canvas.toDataURL()
 
       saveCanvas(canvasId, { data, thumbnail })
     },

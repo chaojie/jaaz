@@ -31,8 +31,7 @@ const CanvasPopbar = ({ pos, selectedImages }: CanvasPopbarProps) => {
       appState: {
         exportWithDarkMode: false,
       },
-      files: excalidrawAPI.getFiles(),
-      getDimensions: () => { return {width: 350, height: 350}}
+      files: excalidrawAPI.getFiles()
     });
     const ctx = canvas.getContext("2d")
     /*ctx.font = "30px Virgil";
