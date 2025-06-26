@@ -47,20 +47,22 @@ class ComfyUIGenerator(ImageGenerator):
         self.basic_comfy_i2i_controlnet_union_workflow = None
         self.nunchaku_flux_1_schnell = None
         self.nunchaku_flux_1_schnell_controlnet_union_pro2 = None
-        self.nunchaku_flux_1_schnell_controlnet_union_pro2 = None
+        self.dreamo_comfyui_v1_1 = None
 
         self.comfy_websocket_client = None
 
         try:
-            self.flux_comfy_workflow = json.load(open(asset_dir, 'r'))
+            self.flux_comfy_workflow = json.load(open(asset_dir, 'r', encoding='utf-8'))
             self.basic_comfy_t2i_workflow = json.load(
-                open(basic_comfy_t2i_workflow, 'r'))
+                open(basic_comfy_t2i_workflow, 'r', encoding='utf-8'))
             self.basic_comfy_i2i_controlnet_union_workflow = json.load(
-                open(basic_comfy_i2i_controlnet_union_workflow, 'r'))
+                open(basic_comfy_i2i_controlnet_union_workflow, 'r', encoding='utf-8'))
             self.nunchaku_flux_1_schnell = json.load(
-                open(nunchaku_flux_1_schnell, 'r'))
+                open(nunchaku_flux_1_schnell, 'r', encoding='utf-8'))
+            self.nunchaku_flux_1_schnell_controlnet_union_pro2 = json.load(
+                open(nunchaku_flux_1_schnell_controlnet_union_pro2, 'r', encoding='utf-8'))
             self.dreamo_comfyui_v1_1 = json.load(
-                open(dreamo_comfyui_v1_1, 'r'))
+                open(dreamo_comfyui_v1_1, 'r', encoding='utf-8'))
         except Exception:
             traceback.print_exc()
 
@@ -90,6 +92,7 @@ class ComfyUIGenerator(ImageGenerator):
         else:
             # sd 1.5, basic is 512, but acceopt 768 for better quality
             pixel_count = 768 ** 2
+        pixel_count = 1024 ** 2
 
         w_ratio, h_ratio = map(int, aspect_ratio.split(':'))
         factor = (pixel_count / (w_ratio * h_ratio)) ** 0.5
@@ -97,38 +100,41 @@ class ComfyUIGenerator(ImageGenerator):
         width = int((factor * w_ratio) / 64) * 64
         height = int((factor * h_ratio) / 64) * 64
 
+        # 检查并移除前缀
+        if input_image.startswith('data:image/png;base64,'):
+            input_image = input_image.split(',', 1)[1]
+
         if '文生图' in model:
+            print('nunchaku_flux_1_schnell')
             workflow = copy.deepcopy(self.nunchaku_flux_1_schnell)
             workflow['6']['inputs']['text'] = prompt
             #workflow['30']['inputs']['ckpt_name'] = model
             workflow['5']['inputs']['width'] = width
             workflow['5']['inputs']['height'] = height
             workflow['25']['inputs']['noise_seed'] = random.randint(1, 2 ** 32)
-        if '控制生图' in model:
+        elif '控制生图' in model:
+            print('nunchaku_flux_1_schnell_controlnet_union_pro2')
             workflow = copy.deepcopy(self.nunchaku_flux_1_schnell_controlnet_union_pro2)
             workflow['1']['inputs']['text'] = prompt
             workflow['36']['inputs']['image'] = input_image
             workflow['9']['inputs']['width'] = width
             workflow['9']['inputs']['height'] = height
             workflow['7']['inputs']['noise_seed'] = random.randint(1, 2 ** 32)
-        if '图片编辑' in model:
-            workflow = copy.deepcopy(self.nunchaku_flux_1_schnell_controlnet_union_pro2)
+        elif '图片编辑' in model:
+            print('dreamo_comfyui_v1_1')
+            workflow = copy.deepcopy(self.dreamo_comfyui_v1_1)
             workflow['6']['inputs']['text'] = prompt
             workflow['58']['inputs']['image'] = input_image
             workflow['27']['inputs']['width'] = width
             workflow['27']['inputs']['height'] = height
             workflow['31']['inputs']['seed'] = random.randint(1, 2 ** 32)
         else:
-            if input_image:
-                workflow = copy.deepcopy(self.basic_comfy_i2i_controlnet_union_workflow)
-                workflow['18']['inputs']['image'] = input_image
-            else:
-                workflow = copy.deepcopy(self.basic_comfy_t2i_workflow)
-            workflow['6']['inputs']['text'] = prompt
-            workflow['5']['inputs']['width'] = width
-            workflow['5']['inputs']['height'] = height
-            workflow['3']['inputs']['seed'] = random.randint(1, 2 ** 32)
+            print('other')
+            return '',0,0,''
 
+        #print(workflow)
+        #workflow=json.load(open('C:/Users/huace/Documents/ComfyUI/jaaz/server/asset/nunchaku_flux_1_schnell_controlnet_union_pro2.json', 'r', encoding='utf-8')) 
+        
         execution = await execute(workflow, host, port, ctx=ctx)
         print('🦄image execution outputs', execution.outputs)
         url = execution.outputs[0]

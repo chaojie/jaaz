@@ -55,7 +55,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       }
 
       const data: CanvasData = {
-        elements,
+        elements:elements.filter((element) => !element.isDeleted ),
         appState: {
           ...appState,
           collaborators: undefined!,

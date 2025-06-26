@@ -46,7 +46,7 @@ export const DEFAULT_PROVIDERS_CONFIG: { [key: string]: LLMConfig } = {
   comfyui: {
     models: {
       '文生图': { type: 'image' },
-      '线稿生图': { type: 'image' },
+      '控制生图': { type: 'image' },
       '图片编辑': { type: 'image' },
     },
     url: 'http://127.0.0.1:8188',

@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import aiosqlite
-from .config_service import USER_DATA_DIR
+import base64
+from .config_service import USER_DATA_DIR, FILES_DIR
 from .migrations.manager import MigrationManager, CURRENT_VERSION
 
 DB_PATH = os.path.join(USER_DATA_DIR, "localmanus.db")
@@ -15,6 +16,26 @@ class DatabaseService:
         self._ensure_db_directory()
         self._migration_manager = MigrationManager()
         self._init_db()
+
+    def save_base64_image(self, base64_str: str, output_path: str):
+        """
+        将带 data:image/png;base64, 前缀的 Base64 字符串保存为 PNG 文件
+        
+        :param base64_str: 完整的 Base64 字符串（包含前缀）
+        :param output_path: 输出 PNG 文件路径
+        """
+        # 检查并移除前缀
+        if base64_str.startswith('data:image/png;base64,'):
+            base64_data = base64_str.split(',', 1)[1]
+        else:
+            base64_data = base64_str  # 若无前缀则直接使用
+        
+        # 解码 Base64 数据
+        image_data = base64.b64decode(base64_data)
+        
+        # 写入 PNG 文件
+        with open(output_path, 'wb') as png_file:
+            png_file.write(image_data)
 
     def _ensure_db_directory(self):
         """Ensure the database directory exists"""
@@ -130,6 +151,10 @@ class DatabaseService:
     async def save_canvas_data(self, id: str, data: str, thumbnail: str = None):
         """Save canvas data"""
         async with aiosqlite.connect(self.db_path) as db:
+            if thumbnail:
+                thumb_path=os.path.join(FILES_DIR, "thumbnail_"+id+".png")
+                self.save_base64_image(thumbnail,thumb_path)
+                thumbnail="thumbnail_"+id+".png"
             await db.execute("""
                 UPDATE canvases 
                 SET data = ?, thumbnail = ?, updated_at = STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'now')
@@ -142,7 +167,7 @@ class DatabaseService:
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = sqlite3.Row
             cursor = await db.execute("""
-                SELECT data, name
+                SELECT data, name, thumbnail
                 FROM canvases
                 WHERE id = ?
             """, (id,))
@@ -154,6 +179,7 @@ class DatabaseService:
                 return {
                     'data': json.loads(row['data']) if row['data'] else {},
                     'name': row['name'],
+                    'thumbnail': row['thumbnail'],
                     'sessions': sessions
                 }
             return None
