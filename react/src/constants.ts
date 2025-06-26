@@ -43,6 +43,15 @@ export const PROVIDER_NAME_MAPPING: {
   },
 }
 export const DEFAULT_PROVIDERS_CONFIG: { [key: string]: LLMConfig } = {
+  comfyui: {
+    models: {
+      '文生图': { type: 'image' },
+      '线稿生图': { type: 'image' },
+      '图片编辑': { type: 'image' },
+    },
+    url: 'http://127.0.0.1:8188',
+    api_key: '',
+  },
   openai: {
     models: {
       'gpt-4o': { type: 'text' },
@@ -94,15 +103,6 @@ export const DEFAULT_PROVIDERS_CONFIG: { [key: string]: LLMConfig } = {
       'wavespeed-ai/flux-dev': { type: 'image' },
     },
     url: 'https://api.wavespeed.ai/api/v3/',
-    api_key: '',
-  },
-  comfyui: {
-    models: {
-      '文生图': { type: 'image' },
-      '线稿生图': { type: 'image' },
-      '图片编辑': { type: 'image' },
-    },
-    url: 'http://127.0.0.1:8188',
     api_key: '',
   },
   ollama: {
