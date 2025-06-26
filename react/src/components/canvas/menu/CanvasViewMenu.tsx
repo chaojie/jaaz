@@ -28,7 +28,7 @@ const CanvasViewMenu = () => {
       return
     }
     const canvas = await exportToCanvas({
-      elements,
+      elements:elements.filter((element) => !element.isDeleted ),
       appState: {
         exportWithDarkMode: false,
       },
@@ -84,9 +84,8 @@ const CanvasViewMenu = () => {
       )}
     >
     <Button
-      className="size-8"
+        className="bg-primary-foreground"
       variant="ghost"
-      size="icon"
       onClick={() => handleAddToChat()}
     >
       <MessageSquarePlus />

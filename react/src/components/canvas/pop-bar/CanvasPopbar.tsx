@@ -27,7 +27,7 @@ const CanvasPopbar = ({ pos, selectedImages }: CanvasPopbarProps) => {
       return
     }
     const canvas = await exportToCanvas({
-      elements,
+      elements:elements.filter((element) => !element.isDeleted ),
       appState: {
         exportWithDarkMode: false,
       },
