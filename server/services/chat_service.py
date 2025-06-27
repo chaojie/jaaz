@@ -10,6 +10,8 @@ from services.langgraph_service import langgraph_agent, langgraph_multi_agent
 from services.config_service import config_service
 from services.websocket_service import send_to_websocket
 from services.stream_service import add_stream_task, remove_stream_task
+from tools.image_generators import generate_image_fun
+from langchain_core.runnables import RunnableConfig
 
 async def handle_chat(data):
     """
@@ -49,21 +51,50 @@ async def handle_chat(data):
 
     await db_service.create_message(session_id, messages[-1].get('role', 'user'), json.dumps(messages[-1])) if len(messages) > 0 else None
 
-    # Create and start langgraph_agent task for chat processing
-    task = asyncio.create_task(langgraph_multi_agent(
-        messages, canvas_id, session_id, text_model, image_model, system_prompt))
+    if text_model.get('model') == '不使用LLM':
+        print(session_id,f'{session_id}')
+        # Create and start langgraph_agent task for chat processing
+        config: RunnableConfig = {
+            "configurable": {
+                "session_id": session_id,
+                "canvas_id":canvas_id,
+                "model_info":{
+                    "image":image_model
+                }
+            }
+        }
+        task = asyncio.create_task(generate_image_fun(
+            messages[-1].get('content', ''), '1:1', config, ''))
+        add_stream_task(session_id, task)
 
-    # Register the task in stream_tasks (for possible cancellation)
-    add_stream_task(session_id, task)
-    try:
-        # Await completion of the langgraph_agent task
-        await task
-    except asyncio.exceptions.CancelledError:
-        print(f"🛑Session {session_id} cancelled during stream")
-    finally:
-        # Always remove the task from stream_tasks after completion/cancellation
-        remove_stream_task(session_id)
-        # Notify frontend WebSocket that chat processing is done
-        await send_to_websocket(session_id, {
-            'type': 'done'
-        })
+        try:
+            # Await completion of the langgraph_agent task
+            await task
+        except asyncio.exceptions.CancelledError:
+            print(f"🛑Session {session_id} cancelled during stream")
+        finally:
+            # Always remove the task from stream_tasks after completion/cancellation
+            remove_stream_task(session_id)
+            # Notify frontend WebSocket that chat processing is done
+            await send_to_websocket(session_id, {
+                'type': 'done'
+            })
+    else:
+        # Create and start langgraph_agent task for chat processing
+        task = asyncio.create_task(langgraph_multi_agent(
+            messages, canvas_id, session_id, text_model, image_model, system_prompt))
+
+        # Register the task in stream_tasks (for possible cancellation)
+        add_stream_task(session_id, task)
+        try:
+            # Await completion of the langgraph_agent task
+            await task
+        except asyncio.exceptions.CancelledError:
+            print(f"🛑Session {session_id} cancelled during stream")
+        finally:
+            # Always remove the task from stream_tasks after completion/cancellation
+            remove_stream_task(session_id)
+            # Notify frontend WebSocket that chat processing is done
+            await send_to_websocket(session_id, {
+                'type': 'done'
+            })

@@ -71,29 +71,19 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
     1000
   )
 
-  const lastImagePosition = useRef<LastImagePosition | null>(
-    localStorage.getItem('excalidraw-last-image-position')
-      ? JSON.parse(localStorage.getItem('excalidraw-last-image-position')!)
-      : null
-  )
   const { theme } = useTheme()
 
   const addImageToExcalidraw = useCallback(
     async (imageElement: ExcalidrawImageElement, file: BinaryFileData) => {
       if (!excalidrawAPI) return
 
+      //excalidrawAPI.resetScene()
+
       excalidrawAPI.addFiles([file])
-
-      const currentElements = excalidrawAPI.getSceneElements()
-      console.log('👇 adding to currentElements', currentElements)
+      
       excalidrawAPI.updateScene({
-        elements: [...(currentElements || []), imageElement],
+        elements: [imageElement],
       })
-
-      localStorage.setItem(
-        'excalidraw-last-image-position',
-        JSON.stringify(lastImagePosition.current)
-      )
     },
     [excalidrawAPI]
   )

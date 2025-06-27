@@ -101,8 +101,10 @@ class ComfyUIGenerator(ImageGenerator):
         height = int((factor * h_ratio) / 64) * 64
 
         # 检查并移除前缀
-        if input_image.startswith('data:image/png;base64,'):
+        if input_image and input_image.startswith('data:image/png;base64,'):
             input_image = input_image.split(',', 1)[1]
+        else:
+            model='文生图'
 
         if '文生图' in model:
             print('nunchaku_flux_1_schnell')

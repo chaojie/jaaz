@@ -62,6 +62,17 @@ async def generate_image(
     tool_call_id: Annotated[str, InjectedToolCallId],
     input_image: Optional[str] = None,
 ) -> str:
+    return await generate_image_fun(prompt,aspect_ratio,config,tool_call_id,input_image)
+
+print('🛠️', generate_image.args_schema.model_json_schema())
+
+async def generate_image_fun(
+    prompt: str,
+    aspect_ratio: str,
+    config: RunnableConfig,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    input_image: Optional[str] = None,
+) -> str:
     """
     Generate an image using the specified provider.
 
@@ -183,8 +194,6 @@ async def generate_image(
         })
         return f"image generation failed: {str(e)}"
 
-print('🛠️', generate_image.args_schema.model_json_schema())
-
 async def generate_new_image_element(canvas_id: str, fileid: str, image_data: dict):
     canvas = await db_service.get_canvas_data(canvas_id)
     canvas_data = canvas.get('data', {})
@@ -206,6 +215,9 @@ async def generate_new_image_element(canvas_id: str, fileid: str, image_data: di
         last_height = last_image_element.get('height', 0)
 
     new_x = last_x + last_width + 20
+    new_x=0
+    last_y=0
+
 
     return {
         'type': 'image',

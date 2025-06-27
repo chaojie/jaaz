@@ -45,6 +45,7 @@ export const PROVIDER_NAME_MAPPING: {
 export const DEFAULT_PROVIDERS_CONFIG: { [key: string]: LLMConfig } = {
   comfyui: {
     models: {
+      '不使用LLM': { type: 'text' },
       '文生图': { type: 'image' },
       '控制生图': { type: 'image' },
       '图片编辑': { type: 'image' },
