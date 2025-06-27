@@ -102,7 +102,7 @@
   },
   "7": {
     "inputs": {
-      "noise_seed": 526841747880726
+      "noise_seed": 430668806534450
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -135,8 +135,8 @@
   },
   "11": {
     "inputs": {
-      "max_shift": 1.15,
-      "base_shift": 0.5,
+      "max_shift": 1.1500000000000001,
+      "base_shift": 0.5000000000000001,
       "width": 800,
       "height": 1200,
       "model": [
@@ -232,7 +232,7 @@
         0
       ],
       "image": [
-        "36",
+        "37",
         0
       ],
       "vae": [
@@ -267,6 +267,18 @@
     "class_type": "ETN_LoadImageBase64",
     "_meta": {
       "title": "Load Image (Base64)"
+    }
+  },
+  "37": {
+    "inputs": {
+      "image": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "ImageInvert",
+    "_meta": {
+      "title": "反转图像"
     }
   }
 }

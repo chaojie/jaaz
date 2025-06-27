@@ -109,7 +109,7 @@ async def generate_image_fun(
         # update the canvas data, add the new image element
         canvas_data = await db_service.get_canvas_data(canvas_id)
 
-        if not input_image and 'thumbnail' in canvas_data:
+        if not input_image and canvas_data and 'thumbnail' in canvas_data:
             input_image=f'{canvas_data['thumbnail']}'
 
         # Prepare input image if provided
@@ -160,21 +160,22 @@ async def generate_image_fun(
             'height': height,
         })
 
-        if 'data' not in canvas_data:
-            canvas_data['data'] = {}
-        if 'elements' not in canvas_data['data']:
-            canvas_data['data']['elements'] = []
-        if 'files' not in canvas_data['data']:
-            canvas_data['data']['files'] = {}
-
-        canvas_data['data']['elements'].append(new_image_element)
-        canvas_data['data']['files'][file_id] = file_data
-
         image_url = f"http://localhost:{DEFAULT_PORT}/api/file/{filename}"
 
-        # print('🛠️canvas_data', canvas_data)
+        if canvas_data:
+            if 'data' not in canvas_data:
+                canvas_data['data'] = {}
+            if 'elements' not in canvas_data['data']:
+                canvas_data['data']['elements'] = []
+            if 'files' not in canvas_data['data']:
+                canvas_data['data']['files'] = {}
 
-        await db_service.save_canvas_data(canvas_id, json.dumps(canvas_data['data']))
+            canvas_data['data']['elements'].append(new_image_element)
+            canvas_data['data']['files'][file_id] = file_data
+
+            # print('🛠️canvas_data', canvas_data)
+
+            await db_service.save_canvas_data(canvas_id, json.dumps(canvas_data['data']))
 
         await broadcast_session_update(session_id, canvas_id, {
             'type': 'image_generated',
